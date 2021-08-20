@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1>Cadastro de Carro</h1>
+        <form  method="post" bodySubmiterEsteNaoExiste successRedirect="index.html">
+
+            placa: <input type="text" name="placa"/><br>    
+            Modelo: <input type="text" name="marca"/><br>
+            Cor: <input type="text" name="corPredominante"/><br>
+            Nome do dono: <input type="text" name="nomeDono"/><br>    
+            Contato: <input type="text" name="contatoDono"/><br>
+            Tipo de Carro:<select name="passs" class="tipoSelect">
+                <option>---</option>
+            </select><br>
+            
+            <button type="submit">enviar</button>
+
+        </form>
+
+        <script src="js/formSubmiter.js" type="text/javascript"></script>
+        <script>
+
+            let tipoSel = document.querySelector(".tipoSelect");
+
+            const xhr2 = new XMLHttpRequest()
+            const url2 = "http://localhost:8080/TipoCarro"
+            xhr2.open("get", url2, true)
+            xhr2.onreadystatechange = function () {
+            
+                if (xhr2.readyState === 4 && xhr2.status === 200) {
+                    
+                    let tipos = JSON.parse(xhr2.responseText)
+                    
+                    for(let i = 0; i<tipos.length; i++){
+                        
+                        let currOption = document.createElement("option")
+                        currOption.setAttribute("value",tipos[i].codigo)
+                        currOption.appendChild(document.createTextNode(tipos[i].tipo))
+                        
+                        tipoSel.appendChild(currOption)
+                        
+                    }
+                    
+                } else if (xhr2.readyState === 4) {
+                    alert("Erro ao recuperar os tipos de carros")
+                }
+                
+                
+
+            }
+            
+            xhr2.send()
+            
+            tipoSel.addEventListener("change",function(event){
+                
+                document.forms[0].setAttribute("action","http://localhost:8080/Carro/"+tipoSel.value);
+                
+            })
+
+        </script>
+    </body>
+</html>

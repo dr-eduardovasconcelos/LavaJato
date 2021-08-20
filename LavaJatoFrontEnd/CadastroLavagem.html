@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1>Inserir uma lavagem</h1>
+        Placa do veículo: <input type="text" id="placa"/><button id="buttonPlaca">pesquisar</button>
+        <div id="dadosVeiculo">
+            
+        </div>
+        <button id="buttonLavagem" disabled>iniciar lavagem</button>
+
+        <script>
+            
+            let carro = {};
+            
+            document.querySelector("#buttonPlaca").addEventListener("click", function (event) {
+
+                const placa = document.querySelector("#placa").value
+
+                const xhr = new XMLHttpRequest()
+                const url = "http://localhost:8080/Carro/"+placa
+                xhr.open("GET", url, true)
+                xhr.setRequestHeader("Content-Type", "application/json")
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        
+                        carro = JSON.parse(xhr.responseText)
+                        
+                        const divCarro = document.querySelector("#dadosVeiculo")
+                        
+                        divCarro.innerHTML = `<h3>Placa:${carro.placa}</h3>
+                                                <h3>Modelo:${carro.marca}</h3>
+                                                <h3>Cor: ${carro.corPredominante}</h3>
+                                                <h4>Qual o tipo da lavagem?
+                                                <form>
+                                                <div ><input type="radio" name="tipo" value="comum"/>comum</div>
+                                                <div ><input type="radio" name="tipo" value="completa"/>completa</div>
+                                                Já tá pago?
+                                                <div ><input type="radio" name="pago" value="true"/>sim</div>
+                                                <div ><input type="radio" name="pago" value="false"/>não</div>
+                                                </form>
+                                                </h4>`
+                        
+                        document.querySelector("#buttonLavagem").removeAttribute("disabled")
+                        
+                    } else if (xhr.readyState === 4) {
+                        alert("Erro ao recuperar as lavagens")
+                    }
+
+                }
+                xhr.send()
+
+            })
+            
+            document.querySelector("#buttonLavagem").addEventListener("click", function(){
+                
+                const Lavagem = {}
+                
+                Lavagem.tipoLavagem = document.forms[0].tipo.value
+                Lavagem.pago = (document.forms[0].pago.value === "true"?true:false)
+                
+                Lavagem.carro = carro
+                
+                const xhr = new XMLHttpRequest()
+                const url = "http://localhost:8080/Lavagem"
+                xhr.open("POST", url, true)
+                xhr.setRequestHeader("Content-Type", "application/json")
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        
+                        alert("Lavagem inserida com sucesso")
+                        
+                        location.href="index.html"
+                        
+                    } else if (xhr.readyState === 4) {
+                        alert("Erro ao iniciar uma lavagem")
+                    }
+
+                }
+                xhr.send(JSON.stringify(Lavagem))
+                
+            })
+        </script>
+    </body>
+</html>

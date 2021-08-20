@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1>DevCaotics, soluções em <i>infartomática</i></h1>
+        <h2>Wash-Jet System</h2>
+        <a href='cadastroTipoCarro.html'>cadastro de tipo carro</a><br>
+        <a href='cadastroCarro.html'>cadastro de carro</a><br/>
+        <a href="CadastroLavagem.html">inserir lavagem</a><br/>
+
+        <div id="dadosLavagens" style="border: 1px solid black; position: relative">
+
+        </div>
+
+        <script>
+
+            let lavagens = []
+
+            const xhr = new XMLHttpRequest()
+            const url = "http://localhost:8080/LavagensAberto"
+            xhr.open("GET", url, true)
+            xhr.setRequestHeader("Content-Type", "application/json")
+            xhr.onreadystatechange = function () {
+                
+                let divLavagens = document.querySelector("#dadosLavagens")
+                
+                if (xhr.readyState === 4 && xhr.status === 200) {
+
+                    if(xhr.responseText.length<4){
+                        divLavagens.innerHTML += "Ainda não há lavagens :(";
+                        return;
+                    }
+
+                    lavagens = JSON.parse(xhr.responseText)
+
+                    lavagens.forEach(lavAux => {
+
+                        const horaChegada = new Date(lavAux.dataEHoraEntrada)
+
+                        divLavagens.innerHTML += `<div style="border: 1px solid green; position: relative">
+                                            Placa: ${lavAux.carro.placa}<br/>
+                                            Modelo: ${lavAux.carro.marca}<br/>
+                                            Cor: ${lavAux.carro.corPredominante}<br/>
+                                            --------------<br/>
+                                            Nome do proprietário: ${lavAux.carro.nomeDono}<br/>
+                                            Contato do proprietário: ${lavAux.carro.contatoDono}<br/>
+                                            --------------<br/>
+                                            Hora da entrada: ${(horaChegada.getHours())<10?'0'+horaChegada.getHours():horaChegada.getHours()}
+                                            :${(horaChegada.getMinutes()<10?'0'+horaChegada.getMinutes():horaChegada.getMinutes())}<br/>
+                                            Já está Pago? ${(lavAux.pago ? 'sim' : 'não')}<br/>
+                                            <button onclick="finalizar('${lavAux.carro.placa}')">finalizar lavagem</button>
+                                        </div>`
+
+                    })
+
+                } else if (xhr.readyState === 4) {
+                    alert("Erro ao recuperar o carro")
+                }
+
+            }
+            xhr.send()
+
+            function finalizar(placa) {
+
+                const xhr = new XMLHttpRequest()
+                const url = "http://localhost:8080/Lavagem/" + placa
+                xhr.open("PUT", url, true)
+                xhr.setRequestHeader("Content-Type", "application/json")
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+
+                        alert(`Lavagem do carro de placa ${placa}, foi finalizado com sucesso!`);
+                        location.reload()
+
+                    } else if (xhr.readyState === 4) {
+                        alert("Erro ao finalizar a lavagem")
+                    }
+
+                }
+                xhr.send()
+
+            }
+
+        </script>
+    </body>
+</html>

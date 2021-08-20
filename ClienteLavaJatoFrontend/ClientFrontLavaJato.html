@@ -1,0 +1,96 @@
+<html>
+<head>
+	<title>lavagens em meu carro</title>
+
+	<script>
+	
+	    function verificar(){
+	    let lavagens = []
+
+	    const placa = document.querySelector("#placa").value
+
+            const xhr = new XMLHttpRequest()
+            const url = "http://localhost:8080/Lavagem/"+placa
+            xhr.open("GET", url, true)
+            xhr.setRequestHeader("Content-Type", "application/json")
+            xhr.onreadystatechange = function () {
+                
+                let divLavagens = document.querySelector("#dadosLavagens")
+                
+                if (xhr.readyState === 4 && xhr.status === 200) {
+
+                    if(xhr.responseText.length<4){
+                        divLavagens.innerHTML += "Ainda não há lavagens :(";
+                        return;
+                    }
+
+                    lavagens = JSON.parse(xhr.responseText)
+
+		    let ultimaLavagem = lavagens[lavagens.length-1]
+
+	            const horaEntrada = new Date(ultimaLavagem.dataEHoraEntrada)
+		    const horaTermino = new Date(ultimaLavagem.dataEHoraTermino)
+
+		    const dataHoje = new Date()
+
+		    if(horaEntrada.getDay() === dataHoje.getDay() && horaEntrada.getMonth() === dataHoje.getMonth() && horaEntrada.getYear() === dataHoje.getYear()){
+
+		    	divLavagens.innerHTML += `*****************<br/><div style="border: 3px solid ${(ultimaLavagem.pronto)?'green':'red'}; position: relative">
+                                            
+					    <h3 style="color:${(ultimaLavagem.pronto)?'green':'red'}">${(ultimaLavagem.pronto)?'Tá pronto chefe!':'Ainda lavando'}</h3>
+					    Placa: ${ultimaLavagem.carro.placa}<br/>
+                                            Modelo: ${ultimaLavagem.carro.marca}<br/>
+                                            Cor: ${ultimaLavagem.carro.corPredominante}<br/>
+
+                                            --------------<br/>
+                                        
+                                            Hora da entrada: ${(horaEntrada.getHours())<10?'0'+horaEntrada.getHours():horaEntrada.getHours()}
+                                            :${(horaEntrada.getMinutes()<10?'0'+horaEntrada.getMinutes():horaEntrada.getMinutes())}<br/>
+                                            Já está Pago? ${(ultimaLavagem.pago ? 'sim' : 'não')}<br/>
+                                        </div>*****************<br/>`
+
+		    }else{
+			divLavagens.innerHTML += `*****************<br/><div style="border: 3px solid blue; position: relative"> 
+					    Não há registros da lavagem de seu carro para hoje :(
+                                        </div>*****************<br/>`
+		    }
+
+
+		    divLavagens.innerHTML+="<h2>Minhas Lavagens</h2>";
+
+                    lavagens.forEach(lavAux => {
+
+                        const horaChegada = new Date(lavAux.dataEHoraEntrada)
+
+                        divLavagens.innerHTML += `<div style="border: 1px solid black; position: relative">
+                                            Placa: ${lavAux.carro.placa}<br/>
+                                            Modelo: ${lavAux.carro.marca}<br/>
+                                            Cor: ${lavAux.carro.corPredominante}<br/>
+                                            --------------<br/>
+                                            Data da Lavagem: ${(horaChegada.getDay())<10?'0'+horaChegada.getDay():horaChegada.getDay()}
+                                            /${(horaChegada.getMonth()<10?'0'+horaChegada.getMonth():horaChegada.getMonth())}/
+					    ${horaChegada.getYear()}<br/>
+                                            Já está Pago? ${(lavAux.pago ? 'sim' : 'não')}<br/>
+                                            
+                                        </div>`
+
+                    })
+
+                } else if (xhr.readyState === 4) {
+                    alert("Erro ao recuperar as lavagens")
+                }
+
+            }
+            xhr.send()
+	    }
+	</script>
+</head>
+<body>
+<h1>Bem vindo a Lava Jato <i>Entendemos do Riscado</i></h1>
+
+<h2>digite a placa de seu carro, para saber se seu veículo está pronto</h2>
+<input type="text" id="placa"/><br/>
+<button onclick="verificar()">verificar</button><br/>
+<div id="dadosLavagens"><div/>
+</body>
+</html>
